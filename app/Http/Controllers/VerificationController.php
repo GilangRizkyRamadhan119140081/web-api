@@ -5,6 +5,7 @@ use Illuminate\Http\Request;
 use Illuminate\Auth\Events\Verified;
 use Illuminate\Support\Facades\URL;
 use Illuminate\Support\Facades\Redirect;
+use Illuminate\Support\Facades\View;
 
 class VerificationController extends Controller
 {
@@ -21,8 +22,8 @@ class VerificationController extends Controller
         $user = \App\Models\User::findOrFail($id);
 
         // Verifikasi hash email
-        if (! hash_equals((string) $hash, sha1($user->email))) {
-            return response()->json(['message' => 'Invalid verification link.'], 400);
+        if (! hash_equals((string) $hash, sha1($user->getEmailForVerification()))) {
+            return redirect('/')->withErrors(['message' => 'Invalid verification link.']);
         }
 
         // Tandai email sebagai terverifikasi
@@ -31,8 +32,8 @@ class VerificationController extends Controller
             event(new Verified($user));
         }
 
-        // Beri respons sukses tanpa melakukan redirect ke route login
-        return response()->json(['message' => 'Your email has been verified!'], 200);
+        // Redirect ke view setelah verifikasi berhasil
+        return view('email_verified'); // Pastikan view ini ada di resources/views
     }
 
     /**
@@ -54,3 +55,4 @@ class VerificationController extends Controller
         return response()->json(['message' => 'Verification email sent.']);
     }
 }
+

@@ -15,16 +15,12 @@ use App\Http\Controllers\VerificationController;
 |
 */
 
-Route::post('register', [AuthController::class, 'register']);
-Route::post('login', [AuthController::class, 'login']);
-Route::post('logout', [AuthController::class, 'logout'])->middleware('auth:sanctum');
+// Rute verifikasi email
+Route::middleware('web')->group(function () {
+    Route::get('/email/verify/{id}/{hash}', [VerificationController::class, 'verify'])
+        ->middleware(['signed'])
+        ->name('verification.verify');
 
-
-
-Route::get('/email/verify/{id}/{hash}', [VerificationController::class, 'verify'])
-    ->middleware(['auth', 'signed'])
-    ->name('verification.verify');
-
-Route::post('/email/resend', [VerificationController::class, 'resend'])
-    ->middleware(['auth'])
-    ->name('verification.send');
+    Route::post('/email/resend', [VerificationController::class, 'resend'])
+        ->name('verification.send');
+});
